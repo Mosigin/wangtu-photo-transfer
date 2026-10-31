@@ -1,0 +1,40 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "妄图照片直传": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wangtu Photo Transfer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "妄图照片直传"
+          }
+        }
+      }
+    },
+    "通过 USB 添加你选择的照片和视频，并在本机读回核验。不删除已有媒体，不通过网络传输。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds your selected photos and videos over USB and verifies originals locally. Does not delete existing media or transfer over the network."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过 USB 添加你选择的照片和视频，并在本机读回核验。不删除已有媒体，不通过网络传输。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
