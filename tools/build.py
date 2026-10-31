@@ -118,8 +118,8 @@ if args.allow_provisioning_updates: command.append('-allowProvisioningUpdates')
 command.append('build')
 # Generate this helper's resources from the sole shared catalog sources.
 root = source.parent
-ui = json.loads((source / 'Localizable.xcstrings').read_text())['strings']
-identity = json.loads((source / 'InfoPlist.xcstrings').read_text())['strings']
+ui = json.loads((source / 'Localizable.xcstrings').read_text(encoding='utf-8'))['strings']
+identity = json.loads((source / 'InfoPlist.xcstrings').read_text(encoding='utf-8'))['strings']
 keys = list(ui)
 for language in ['en', 'zh-Hans']:
     resources = output / 'Resources' / (language + '.lproj')
@@ -128,12 +128,12 @@ for language in ['en', 'zh-Hans']:
         return '\n'.join(json.dumps(k, ensure_ascii=False) + ' = ' + json.dumps(v, ensure_ascii=False) + ';'
                          for k, v in mapping.items()) + '\n'
     translations = {k: ui[k]['localizations'][language]['stringUnit']['value'] for k in keys}
-    (resources / 'Localizable.strings').write_text(strings(translations))
+    (resources / 'Localizable.strings').write_text(strings(translations), encoding='utf-8')
     fields = {'CFBundleDisplayName': '妄图照片直传',
               'NSPhotoLibraryUsageDescription': '通过 USB 添加你选择的照片和视频，并在本机读回核验。不删除已有媒体，不通过网络传输。',
               'NSPhotoLibraryAddUsageDescription': '通过 USB 添加你选择的照片和视频，并在本机读回核验。不删除已有媒体，不通过网络传输。'}
     fields = {key: identity[value]['localizations'][language]['stringUnit']['value'] for key, value in fields.items()}
-    (resources / 'InfoPlist.strings').write_text(strings(fields))
+    (resources / 'InfoPlist.strings').write_text(strings(fields), encoding='utf-8')
 if not args.compile:
     print(json.dumps({'prepared': str(project), 'compiled': False, 'bundle': settings['PRODUCT_BUNDLE_IDENTIFIER']}))
     raise SystemExit(0)

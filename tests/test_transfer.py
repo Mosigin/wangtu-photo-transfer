@@ -109,6 +109,12 @@ class ReceiptTests(unittest.TestCase):
         transfer.verify_receipt({'id':'one','entries':[{'id':'a'},{'id':'b'}]},
                                 {'batch':'one','state':'space','results':{'a':'verified'}})
 
+    def test_unicode_private_plan_is_utf8(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'plan.json'
+            transfer.atomic_json(path, {'file': '影片.mp4'})
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['file'], '影片.mp4')
+
     def test_atomic_ledger(self):
         with tempfile.TemporaryDirectory() as temp:
             path=Path(temp)/'ledger.json';transfer.atomic_json(path, {'pending':{'id':'one'}})

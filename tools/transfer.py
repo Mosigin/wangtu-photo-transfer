@@ -22,7 +22,7 @@ DEVICE_TIMEOUT = 600
 
 def atomic_json(path, value):
     temp = path.with_suffix(path.suffix + '.tmp')
-    with temp.open('w') as stream:
+    with temp.open('w', encoding='utf-8') as stream:
         json.dump(value, stream, ensure_ascii=False, indent=2)
         stream.flush()
         os.fsync(stream.fileno())
@@ -49,7 +49,7 @@ def copy_from(device, remote, local):
         try:
             run_device(device, 'device', 'copy', 'from', '--domain-type', 'appDataContainer',
                        '--domain-identifier', BUNDLE, '--source', remote, '--destination', str(local))
-            return json.loads(local.read_text())
+            return json.loads(local.read_text(encoding='utf-8'))
         except (subprocess.CalledProcessError, json.JSONDecodeError, FileNotFoundError):
             # The phone replaces its status atomically; CoreDevice can also close
             # a USB file-service socket transiently. This is a read-only retry.
@@ -78,13 +78,13 @@ def execute(args, entries):
         raise RuntimeError('USB transfer currently requires macOS + Xcode. Windows supports planning only.')
     info = args.work / 'device-info.json'
     run_device(args.device, 'device', 'info', 'details', '--json-output', str(info))
-    device_info = json.loads(info.read_text())['result']
+    device_info = json.loads(info.read_text(encoding='utf-8'))['result']
     connection = device_info['connectionProperties']
     if connection.get('transportType') != 'wired':
         raise ValueError('A wired device connection is required')
     ledger_path = args.work / 'ledger.json'
     fingerprint = hashlib.sha256(json.dumps(entries, sort_keys=True).encode()).hexdigest()
-    ledger = json.loads(ledger_path.read_text()) if ledger_path.exists() else {
+    ledger = json.loads(ledger_path.read_text(encoding='utf-8')) if ledger_path.exists() else {
         'sourceFingerprint': fingerprint, 'completed': {}, 'nextBatch': 1, 'pending': None}
     if ledger['sourceFingerprint'] != fingerprint:
         raise ValueError('Source changed; do not reuse this receipt ledger')
@@ -147,7 +147,7 @@ def execute(args, entries):
             ledger['pending'] = batch
             atomic_json(ledger_path, ledger)
         run_device(args.device, 'device', 'info', 'details', '--json-output', str(info))
-        observed = json.loads(info.read_text())['result']['connectionProperties']
+        observed = json.loads(info.read_text(encoding='utf-8'))['result']['connectionProperties']
         if observed.get('transportType') != 'wired':
             raise RuntimeError('Wired connection lost; no new batch sent')
         # A prepared batch is durable before payload copying. The request is sent last.
