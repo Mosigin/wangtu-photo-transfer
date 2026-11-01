@@ -2,7 +2,9 @@
 
 这是「妄图照片直传 / Wangtu Photo Transfer」，一个独立仓库。
 
-先读 `AGENTS.md`、`README.md`、`docs/MAC.md`。Windows 请求还要读 `docs/WINDOWS.md`。
+先读 `AGENTS.md`、`README.md`，再按电脑平台读取 `docs/MAC.md` 或 `docs/WINDOWS.md`。**Windows 当前只做离线规划；不要照抄 Mac 的设备／构建命令，也不要把用户愿意测试误当成已经具备 Windows 传输后端。**
+
+先向用户简短说明：这是 Mac 发送脚本 + iPhone 接收 App，把所选媒体添加到系统照片；用户负责首次手机系统确认，AI 负责已授权的环境准备和操作。用户若只想了解用途，不要直接安装或开始传输。
 
 ## 你要完成什么
 
@@ -19,6 +21,10 @@
 7. 用 `--source`、`--media`、明确 `--device`、同一 `--bundle-id`、仓库外 `--work` 与 `--reserve-gb` 持续执行。
 8. 观察 `progress.json` 和日志。失败时先看 `ledger.json` 的 pending 与手机状态，照协议恢复，不盲目重发。源文件／工作目录移动会改变指纹，需要先核对。
 9. 结束必须读取 `summary.json`，核对 verified、failed、remaining、freeBytes 和停止原因。源素材未传完而空间不足时要明确说出。保留私有账本，停止本次防休眠，告诉用户实际结果。
+
+向用户报告时把字节换成容易理解的空间单位，并分清源媒体大小与实际手机占用；异常退出可能没有新的 `summary.json`，不能把上一次汇总当作本次结果。规划输出的 `execute=false` 只表示清单生成成功，手机没有因此收到媒体。
+
+续传沿用原命令／源目录／工作目录／接收 App。文件夹更换、内容变化、账本丢失、接收 App 被卸载或已有任务来源 ID 冲突时，先核对记录，不通过清空历史或换 Bundle ID 绕过保护。此工具不做手机全库查重，也不恢复文件夹对应的相簿。
 
 ## 不可省略的事实
 

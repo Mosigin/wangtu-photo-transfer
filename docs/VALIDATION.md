@@ -2,6 +2,10 @@
 
 初始公开版本，2026-10-31。
 
+2026-11-01核对：公开提交 `185777e` 的[自动检查运行41174357753](https://github.com/Mosigin/wangtu-photo-transfer/actions/runs/41174357753)全部通过，包含Mac／Windows／Linux的Python规划与协议检查、工程准备，以及Mac上的Swift策略／iOS源码检查。Windows仍没有USB后端；此结果不是Windows手机传输或公开版真机验收。
+
+本轮补齐中英README用途、用户与AI操作分工、Mac完整命令／参数、结果判定，以及Windows何时需要用户测试。文档参数与当前发送器／构建脚本核对；没有构建签名App或操作手机。图标沿用用户认可的照片卡片和弧线版本。
+
 | 项目 | 证据／边界 |
 |---|---|
 | 原始照片／Live导入引擎 | 既往Mac + 实际iPhone使用，含JPEG／PNG／HEIC和有效Live，保存后逐原资源读回；具体私人素材和设备编号不公开 |
@@ -15,3 +19,5 @@
 | 图标和资源 | 无文字1024×1024图标，独立中英界面／权限来源及工程引用检查 |
 
 CI通过不等于安装成功、Photos保存成功或视频可播放。验收新平台时保存工具commit、系统和格式类型、成功／失败／未知项及实际剩余空间；不要提交原媒体、账号、设备ID、描述文件或本机路径。
+
+Documentation checks (2026-11-01): 27 Python tests passed, including local documentation links; 18 shell examples passed syntax validation without executing device operations.

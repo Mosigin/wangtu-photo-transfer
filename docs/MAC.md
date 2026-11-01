@@ -2,6 +2,26 @@
 
 从仓库根目录运行。需要 Python 3.9+、完整 Xcode（仅 Command Line Tools 不够）、USB 数据线和受该 Xcode 支持的 iPhone。本 App 最低 iOS 17；实际设备系统是否兼容当前 Xcode，先用 `devicectl` 核对。解锁手机并信任电脑；若签名运行要求开发者模式，用户在手机设置中启用并完成系统步骤。
 
+## 0. 获取项目、准备路径
+
+```sh
+git clone https://github.com/Mosigin/wangtu-photo-transfer.git
+cd wangtu-photo-transfer
+```
+
+已经下载过的用户直接进入现有仓库。以下示例包含占位值，运行前替换；素材和记录都留在自己的电脑上。
+
+| 示例值／参数 | 应填什么 |
+|---|---|
+| `YOUR_DEVICE_ID` | 本次只读设备列表中、与你选定的有线 iPhone 对应的实际编号 |
+| `YOUR_TEAM_ID` | 你自己的 Xcode 签名团队编号 |
+| `com.example.yourname.wangtu` | 为接收 App 选定的唯一 Bundle ID；构建、安装查询和传输使用同一个值 |
+| `--source` | 素材文件夹，例如 `"/Volumes/YourDrive/ToTransfer"`；递归包含子目录 |
+| `--work` | 私人进度／暂存目录，例如 `"$HOME/WangtuRuns/my-transfer"`；必须在素材目录和本仓库之外 |
+| `--reserve-gb` | 手机至少预留多少十进制 GB，范围1～1000；另留约150MB处理余量 |
+
+首次先在 Xcode 完成你自己的签名环境配置。接收 App 需要合法签名；手机本身无需登录 Apple 账号。手机信任、开发者模式与照片权限由用户在系统提示中确认。
+
 ## 1. 环境和目标
 
 ```sh
@@ -54,7 +74,15 @@ xcrun swiftc -parse-as-library tools/MakeSmokeMedia.swift -o /tmp/wangtu-make-sm
 python3 tools/transfer.py --source "$HOME/WangtuSmokeMedia" --work "$HOME/WangtuRuns/smoke"
 ```
 
-确认 dry-run 范围与空间，再加 `--device YOUR_DEVICE_ID --bundle-id com.example.yourname.wangtu --execute`。需要同时验证：
+确认 dry-run 范围与空间后，运行完整试传命令：
+
+```sh
+python3 tools/transfer.py --source "$HOME/WangtuSmokeMedia" \
+  --work "$HOME/WangtuRuns/smoke" --reserve-gb 1 \
+  --device YOUR_DEVICE_ID --bundle-id com.example.yourname.wangtu --execute
+```
+
+需要同时验证：
 
 1. 主机 `summary.json`：全部为 verified，failed 为0，没有 pending。
 2. 手机系统照片中有新增素材，视频可以播放。
@@ -71,10 +99,14 @@ python3 tools/transfer.py --source "/path/to/your/media" --media all \
   --work "$HOME/WangtuRuns/my-transfer" --reserve-gb 1
 ```
 
-`--media photos` 只选照片，`videos` 只选视频，`all` 选两者；默认 all。确认后增加以下三个参数：
+规划输出 `execute=false`、照片／视频数量和源文件字节总数，同时写入 `plan.json`，此时没有往手机保存任何内容。核对所选范围后再实际执行。
+
+`--media photos` 只选照片，`videos` 只选视频，`all` 选两者；默认 all。确认后使用完整执行命令：
 
 ```sh
---device YOUR_DEVICE_ID --bundle-id com.example.yourname.wangtu --execute
+python3 tools/transfer.py --source "/path/to/your/media" --media all \
+  --work "$HOME/WangtuRuns/my-transfer" --reserve-gb 1 \
+  --device YOUR_DEVICE_ID --bundle-id com.example.yourname.wangtu --execute
 ```
 
 大视频默认单独成批，仍受手机双份临时空间预算与电脑中转空间预算保护。可用 `--timeout 1800` 调整单次设备命令超时（10～3600秒）。默认每常规批最多20项、约32MB。
@@ -114,13 +146,25 @@ touch "$HOME/WangtuRuns/my-transfer/STOP"
 
 或在手机点「暂停」。当前一个小事务可能继续至安全边界。保留原 `--work`；恢复时删除电脑 STOP 文件，手机重新点「开始写入」，再执行同一命令。不要删除 `ledger.json` 或手机 `receipts.jsonl`。
 
-停止原因见 `summary.json`：
+恢复时只移除本任务的电脑暂停标记：
+
+```sh
+rm -f "$HOME/WangtuRuns/my-transfer/STOP"
+```
+
+素材路径／内容变化或接收 App 记录丢失时，先核对来源和已有回执；新建一个工作目录不能代替恢复。
+
+`summary.json`中的停止原因：
 
 - `source_exhausted`：所选素材都已处理；还要看 failed。
 - `reserve_reached`：手机余量保护触发，remaining 通常不为0。
 - `no_item_fits_safe_budget`：剩余项目中没有能安全放下的；例如仅剩超大视频，手机可能还剩多于预留值的空间。
 
 正常结束应没有未知 pending。异常退出则按[协议文档](PROTOCOL.md)先核对手机状态，禁止假称完成。实际余量可能因系统活动变化。
+
+普通用户至少确认：已核验多少项、失败多少项、还剩多少项、手机还剩多少空间，以及为什么停下。`source_exhausted` 也要检查 `failed=0`，并确认 `remaining=0`、`pending=false`。暂停或异常退出可能没有更新汇总文件，需要结合当前账本和手机状态，不能沿用旧结果。
+
+`progress.json`／`ledger.json` 用于本机查看和续传，可能包含私人路径和资产信息；不要原样贴到公开问题报告。
 
 ## 常见问题
 
